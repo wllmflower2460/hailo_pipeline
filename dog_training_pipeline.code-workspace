@@ -1,0 +1,35 @@
+{
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
+    "settings": {
+        "python.defaultInterpreterPath": "./.venv/bin/python",
+        "python.terminal.activateEnvironment": true,
+        "terminal.integrated.env.linux": {
+            "PYTHONPATH": "${workspaceFolder}"
+        },
+        "python.analysis.extraPaths": [
+            "${workspaceFolder}"
+        ],
+        "files.watcherExclude": {
+            "**/.git/objects/**": true,
+            "**/.git/subtree-cache/**": true,
+            "**/node_modules/*/**": true,
+            "**/.venv/**": true,
+            "**/data/raw/**": true,
+            "**/data/processed/**": true
+        }
+    },
+    "extensions": {
+        "recommendations": [
+            "ms-python.python",
+            "ms-python.vscode-pylance",
+            "ms-python.debugpy",
+            "ms-toolsai.jupyter",
+            "ms-python.black-formatter",
+            "matangover.mypy"
+        ]
+    }
+}

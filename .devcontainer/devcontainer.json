@@ -1,0 +1,19 @@
+// This is a basic Dev Container configuration for VS Code
+{
+    "name": "Dog Training Pipeline Dev Container",
+    "build": {
+        "dockerfile": "../hailo_integration/docker/Dockerfile"
+    },
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "terminal.integrated.shell.linux": "/bin/bash"
+            },
+            "extensions": [
+                "ms-python.python",
+                "ms-azuretools.vscode-docker"
+            ]
+        }
+    },
+    "postCreateCommand": "pip install -r ../requirements.txt"
+}

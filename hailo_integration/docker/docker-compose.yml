@@ -1,0 +1,46 @@
+version: '3'
+
+services:
+  hailo-dev:
+    build:
+      context: ../../  # Build context is the project root
+      dockerfile: hailo_integration/docker/Dockerfile
+    image: hailo-dog-training:latest
+    container_name: hailo-dog-training
+    volumes:
+      - ../../:/app  # Mount project directory
+      - ../../data:/app/data  # Mount data directory
+      - ../../results:/app/results  # Mount results directory
+    environment:
+      - PYTHONPATH=/app
+      - OMP_NUM_THREADS=8
+      - MKL_NUM_THREADS=8
+      - NUMEXPR_NUM_THREADS=8
+      - OPENBLAS_NUM_THREADS=8
+    ports:
+      - "8888:8888"  # Jupyter notebook
+    command: >
+      bash -c "cd /app && 
+      python3 -m jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token='hailo'"
+
+  hailo-inference:
+    build:
+      context: ../../
+      dockerfile: hailo_integration/docker/Dockerfile
+    image: hailo-dog-training:latest
+    container_name: hailo-inference
+    volumes:
+      - ../../:/app
+      - ../../data:/app/data
+      - ../../results:/app/results
+    environment:
+      - PYTHONPATH=/app
+    # This service is for running inference with the Hailo device
+    devices:
+      - "/dev/hailo0:/dev/hailo0"  # Map the Hailo device if available
+    command: >
+      bash -c "cd /app &&
+      echo 'Hailo inference service is running. Connect with: docker exec -it hailo-inference bash'"
+    # Keep container running
+    tty: true
+    stdin_open: true

@@ -1,0 +1,50 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}",
+                "OMP_NUM_THREADS": "16",
+                "MKL_NUM_THREADS": "16"
+            },
+            "justMyCode": true
+        },
+        {
+            "name": "Python: Check Environment",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/check_env.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            },
+            "justMyCode": true
+        },
+        {
+            "name": "CPU Performance Test",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/test_cpu_performance.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            },
+            "justMyCode": true
+        },
+        {
+            "name": "Jupyter Notebook",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/start_jupyter.sh",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }
+    ]
+}

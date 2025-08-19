@@ -1,0 +1,6 @@
+# Hailo Model Zoo Performance Summary (quick notes)
+- MobileNet-v2: ~1247 FPS (batch=8)
+- ResNet-50: ~892 FPS (batch=8)
+- EfficientNet-B0: ~750 FPS (batch=8)
+- YOLOv8n: ~354 FPS (batch=8)
+- YOLOv8s: ~128 FPS (single)

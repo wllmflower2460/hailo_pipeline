@@ -1,0 +1,144 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Setup Environment",
+            "type": "shell",
+            "command": "source",
+            "args": [
+                "${workspaceFolder}/setup_env.sh"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Start Jupyter Notebook",
+            "type": "shell",
+            "command": "${workspaceFolder}/start_jupyter.sh",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Install CPU PyTorch",
+            "type": "shell",
+            "command": "${workspaceFolder}/install_pytorch_cpu.sh",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Install Dependencies",
+            "type": "shell",
+            "command": "./.venv/bin/pip",
+            "args": [
+                "install",
+                "-r",
+                "requirements.txt"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Run CPU Performance Test",
+            "type": "shell",
+            "command": "source ${workspaceFolder}/setup_env.sh && python ${workspaceFolder}/src/test_cpu_performance.py",
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Check Environment",
+            "type": "shell",
+            "command": "source ${workspaceFolder}/setup_env.sh && python ${workspaceFolder}/src/check_env.py",
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Start Hailo Docker",
+            "type": "shell",
+            "command": "${workspaceFolder}/hailo_integration/docker/start-hailo-docker-simple.sh",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/hailo_integration/docker"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Stop Hailo Docker",
+            "type": "shell",
+            "command": "podman stop hailo-dog-training hailo-inference && podman rm hailo-dog-training hailo-inference",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/hailo_integration/docker"
+            },
+            "problemMatcher": []
+        }
+    ]
+}
