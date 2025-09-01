@@ -1,6 +1,6 @@
 # GPU Server Setup Instructions
 
-**Complete deployment guide for Hailo TCN Inference Pipeline on gpusrv**
+**Complete deployment guide for Hailo TCN Inference Pipeline (running directly on gpusrv)**
 
 ---
 

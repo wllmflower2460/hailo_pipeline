@@ -1,15 +1,15 @@
 # GPUSrv Deployment Plan for Hailo Pipeline
 **Date**: 2025-08-31  
-**Current Status**: Mac setup complete, ready for GPUSrv migration  
-**Goal**: Deploy hailo_pipeline to GPUSrv with RTX 2060 for accelerated development  
+**Current Status**: Working directly on GPUSrv with RTX 2060  
+**Goal**: Deploy hailo_pipeline on GPUSrv with GPU acceleration for development  
 
 ## 🔍 Current Project Analysis
 
-### **Local Mac Setup (Completed)**
-- ✅ Repository cloned to `/Users/willflower/Documents/Projects/hailo_pipeline/`
-- ✅ Python virtual environment created
-- ✅ PyTorch + NumPy installed (CPU-only for Mac)
-- ✅ Project structure analyzed
+### **GPUSrv Environment (Current)**
+- ✅ Repository cloned and working directly on GPUSrv
+- ✅ Python 3.10.12 with 8 cores, 31GB RAM available
+- ✅ PyTorch 2.8.0+cpu ready for GPU upgrade
+- ✅ RTX 2060 GPU available for acceleration
 
 ### **Current Implementation Status**
 **Core Components Identified**:
@@ -25,29 +25,28 @@
 - **Containerized workflow** ready for deployment
 - **TCN-VAE integration missing** - needs connection to EdgeInfer work
 
-## 🚀 GPUSrv Migration Strategy
+## 🚀 GPUSrv Development Strategy
 
-### **Phase 1: Repository Migration (Day 1)**
+### **Phase 1: Environment Optimization (Current)**
 ```bash
-# On GPUSrv
-cd /opt/
-git clone https://github.com/wllmflower2460/hailo_pipeline.git
-cd hailo_pipeline
-
-# Setup virtual environment with CUDA support
-python3 -m venv .venv
+# Already on GPUSrv - optimize existing environment
+cd ~/projects/hailo_pipeline  # Current working directory
 source .venv/bin/activate
 
-# Install PyTorch with CUDA support for RTX 2060
+# Upgrade PyTorch for CUDA support with RTX 2060
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
 pip install jupyter matplotlib scipy scikit-learn
+
+# Set optimal threading for 8-core system
+export OMP_NUM_THREADS=8
+export MKL_NUM_THREADS=8
 ```
 
-### **Phase 2: GPU Environment Validation (Day 1)**
+### **Phase 2: GPU Environment Validation (Current)**
 ```bash
-# Test NVIDIA GPU instead of AMD
-python src/test_gpu_performance.py  # Modify for CUDA
-nvidia-smi  # Verify RTX 2060 visibility
+# Test NVIDIA GPU (RTX 2060)
+nvidia-smi  # Verify RTX 2060 visibility and utilization
+python -c "import torch; print('CUDA available:', torch.cuda.is_available()); print('GPU:', torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'None')"
 
 # Update environment scripts for CUDA
 sed -i 's/ROCm/CUDA/g' setup_gpu.sh
