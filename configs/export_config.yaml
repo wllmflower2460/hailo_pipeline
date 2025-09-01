@@ -1,0 +1,97 @@
+# ONNX Export Configuration for TCN-VAE Encoder
+# Critical settings for Hailo-8 compatibility and inference parity
+
+model:
+  # Input specifications (MUST match training exactly)
+  input_shape: [1, 100, 9]  # Static batch size for Hailo compatibility
+  input_names: ["imu_window"]
+  
+  # Output specifications
+  output_names: ["latent_embeddings", "motif_scores"]
+  expected_outputs:
+    latent_dim: 64
+    motif_count: 12
+  
+  # Model loading
+  encoder_key: "encoder"  # Key in checkpoint dict, or null for direct model
+  device: "cpu"  # Force CPU for export consistency
+
+onnx:
+  # ONNX export settings
+  opset_version: 11  # Hailo-8 compatible opset
+  
+  # Optimization settings
+  do_constant_folding: true
+  strip_doc_string: true
+  
+  # Dynamic axes (disabled for Hailo compatibility)
+  dynamic_axes: {}  # Empty - all dimensions must be static
+  
+  # Export options
+  export_params: true
+  training: false  # Export in inference mode
+  
+  # Validation
+  validate_export: true
+  check_tolerance: 1e-5
+
+hailo_compatibility:
+  # Hailo-8 specific requirements
+  static_shapes_only: true
+  batch_size_one: true
+  
+  # Supported operations check
+  check_supported_ops: true
+  unsupported_ops_allowed: []  # Fail if any unsupported ops found
+  
+  # Memory layout
+  prefer_nhwc: false  # Keep NCHW for 1D conv compatibility
+  
+normalization:
+  # Normalization parameters (from TCN-VAE_models v0.1.0)
+  # These MUST match training exactly for inference parity
+  method: "z_score"
+  per_channel: true
+  
+  # Values from normalization.json
+  zscore_mean: [0.12, -0.08, 9.78, 0.002, -0.001, 0.003, 22.4, -8.7, 43.2]
+  zscore_std: [3.92, 3.87, 2.45, 1.24, 1.31, 0.98, 28.5, 31.2, 24.8]
+  
+  # Channel mapping
+  channel_order: ["ax", "ay", "az", "gx", "gy", "gz", "mx", "my", "mz"]
+
+validation:
+  # Export validation settings
+  compare_outputs: true
+  tolerance_absolute: 1e-4
+  tolerance_relative: 1e-3
+  
+  # Test inputs for validation
+  test_patterns:
+    - name: "zeros"
+      description: "All-zero input"
+    - name: "walking"
+      description: "Simulated walking pattern"
+    - name: "random"
+      description: "Random values in sensor ranges"
+  
+  # Cosine similarity requirements (from Hailo_Feasibility.md)
+  min_cosine_similarity: 0.99  # PyTorch → ONNX requirement
+
+artifacts:
+  # Output paths
+  onnx_output_dir: "exports"
+  model_name_template: "tcn_encoder_{version}.onnx"
+  
+  # Metadata preservation
+  save_metadata: true
+  metadata_format: "json"
+  
+  # Version tracking
+  include_git_hash: true
+  include_timestamp: true
+
+logging:
+  level: "info"
+  export_progress: true
+  detailed_validation: false  # Set to true for debugging

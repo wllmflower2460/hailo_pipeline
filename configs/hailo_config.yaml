@@ -1,0 +1,182 @@
+# Hailo DFC Compilation Configuration
+# Settings for compiling ONNX models to Hailo-8 .hef format
+
+compilation:
+  # Target hardware
+  target_platform: "hailo8"
+  
+  # Optimization settings
+  optimization_level: "performance"  # performance, accuracy, balanced
+  
+  # Quantization settings
+  quantization:
+    method: "post_training"  # Post-training quantization (PTQ)
+    precision: "int8"        # INT8 weights and activations
+    
+    # Calibration dataset requirements
+    calibration:
+      required: true
+      min_samples: 1000
+      max_samples: 5000
+      batch_size: 1
+      
+      # Data source options
+      data_source: "synthetic"  # synthetic, real_data, mixed
+      
+      # IMU-specific calibration patterns
+      patterns:
+        - name: "stationary"
+          weight: 0.2
+          description: "Device at rest"
+        - name: "walking"
+          weight: 0.3
+          description: "Normal walking patterns"
+        - name: "running"
+          weight: 0.2
+          description: "High-intensity movement"
+        - name: "mixed_activities"
+          weight: 0.3
+          description: "Diverse activity patterns"
+
+# DFC compiler options
+dfc_options:
+  # Memory management
+  allocate_targets: true
+  enable_memory_optimization: true
+  
+  # Performance tuning
+  multi_process_optimization: true
+  parallel_optimization: 4  # Number of parallel processes
+  
+  # Debugging and profiling
+  profile_model: false
+  generate_profiling_data: false
+  verbose_compilation: true
+
+# Hardware constraints
+hardware_limits:
+  # Hailo-8 specifications
+  max_model_size_mb: 100
+  max_runtime_memory_mb: 512
+  
+  # Performance targets from ADR-0007
+  target_latency_ms: 50
+  target_throughput_windows_per_sec: 20
+  
+  # Power budget
+  max_power_consumption_w: 5
+
+# Output specifications
+output:
+  # HEF file settings
+  hef_output_dir: "artifacts"
+  hef_name_template: "tcn_encoder_{version}.hef"
+  
+  # Metadata and reports
+  generate_compilation_report: true
+  save_calibration_data: true
+  include_performance_estimates: true
+  
+  # Validation outputs
+  generate_test_vectors: true
+  save_intermediate_representations: false  # For debugging only
+
+# Validation and testing
+validation:
+  # Post-compilation validation
+  validate_hef: true
+  
+  # Accuracy validation
+  accuracy_threshold:
+    cosine_similarity_min: 0.95  # ONNX → HEF requirement from feasibility doc
+    max_accuracy_drop_percent: 5.0
+  
+  # Performance validation
+  performance_validation:
+    benchmark_runs: 100
+    validate_latency_target: true
+    validate_throughput_target: true
+  
+  # Test patterns for validation
+  test_patterns: ["zeros", "walking", "running", "realistic_mixed"]
+
+# Model-specific settings
+model_config:
+  # TCN-VAE encoder specifications
+  input_spec:
+    name: "imu_window"
+    shape: [1, 100, 9]
+    data_type: "float32"
+    
+    # Input normalization (applied before inference)
+    normalization:
+      method: "z_score"
+      parameters_source: "tcn_vae_v0.1.0"  # Reference to normalization.json
+  
+  output_spec:
+    - name: "latent_embeddings"
+      shape: [1, 64]
+      data_type: "float32"
+      description: "64-dimensional latent space representation"
+      
+    - name: "motif_scores"
+      shape: [1, 12]
+      data_type: "float32"
+      description: "Activity motif probability scores"
+      range: [0.0, 1.0]
+
+# Calibration data generation
+calibration_generation:
+  # Synthetic IMU data generation
+  synthetic_data:
+    # Accelerometer patterns (m/s²)
+    accelerometer:
+      stationary_bias: [0.1, -0.05, 9.8]
+      stationary_noise_std: [0.2, 0.2, 0.1]
+      
+      walking_amplitude: [2.0, 1.5, 0.8]
+      walking_frequency_hz: [2.0, 2.0, 4.0]  # Step frequency and harmonics
+      
+      running_amplitude: [4.0, 3.0, 2.0]
+      running_frequency_hz: [3.0, 3.0, 6.0]
+    
+    # Gyroscope patterns (rad/s)
+    gyroscope:
+      stationary_noise_std: [0.02, 0.02, 0.02]
+      
+      walking_amplitude: [0.3, 0.2, 0.4]
+      walking_frequency_hz: [2.0, 1.0, 2.0]
+      
+      running_amplitude: [0.8, 0.5, 1.0]
+      running_frequency_hz: [3.0, 2.0, 3.0]
+    
+    # Magnetometer patterns (μT)
+    magnetometer:
+      earth_field_base: [25.0, -8.0, 43.0]
+      orientation_variation_std: [10.0, 10.0, 8.0]
+      noise_std: [2.0, 2.0, 2.0]
+
+# Deployment integration
+deployment:
+  # EdgeInfer integration
+  edgeinfer_compatibility: true
+  
+  # HailoRT runtime settings
+  runtime_config:
+    device_id: 0
+    batch_size: 1
+    num_of_async_infer_requests: 4
+    
+  # Container deployment
+  container_integration:
+    mount_path: "/app/artifacts"
+    environment_variables:
+      HEF_PATH: "/app/artifacts/tcn_encoder_{version}.hef"
+      NUM_MOTIFS: 12
+
+# Logging and monitoring
+logging:
+  level: "info"
+  detailed_progress: true
+  save_compilation_log: true
+  log_file: "telemetry/hailo_compilation_{timestamp}.log"
