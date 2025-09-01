@@ -1,0 +1,115 @@
+# HailoRT TCN Inference Sidecar - Docker Compose
+# Production deployment for EdgeInfer integration
+
+version: '3.8'
+
+services:
+  hailo-inference:
+    build:
+      context: ../..
+      dockerfile: src/deployment/Dockerfile
+    container_name: hailo-tcn-inference
+    restart: unless-stopped
+    
+    ports:
+      - "9000:9000"  # Inference API port
+    
+    volumes:
+      # Model artifacts (read-only)
+      - ../../artifacts:/app/artifacts:ro
+      # Telemetry output (read-write)
+      - ../../telemetry:/app/telemetry:rw
+      # Optional: Config overrides
+      - ../../configs:/app/configs:ro
+    
+    # Hailo device access (critical for hardware acceleration)
+    devices:
+      - /dev/hailo0:/dev/hailo0
+    
+    environment:
+      # Model configuration
+      - HEF_PATH=/app/artifacts/tcn_encoder.hef
+      - NUM_MOTIFS=12
+      
+      # Service configuration
+      - SIDECAR_HOST=0.0.0.0
+      - SIDECAR_PORT=9000
+      - LOG_LEVEL=info
+      - WORKERS=1  # Single worker for deterministic inference
+      
+      # Performance tuning
+      - BACKEND_TIMEOUT_MS=100
+      - MAX_BATCH_SIZE=1  # Real-time inference, no batching
+      
+      # Health check configuration
+      - HEALTH_CHECK_INTERVAL=30
+    
+    # Resource limits for Pi deployment
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '2.0'
+        reservations:
+          memory: 256M
+          cpus: '1.0'
+    
+    # Health check matching EdgeInfer expectations
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s  # Allow time for HEF loading
+    
+    # Networking for EdgeInfer integration
+    networks:
+      - edgeinfer-network
+
+# Network for EdgeInfer communication
+networks:
+  edgeinfer-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# Optional: Prometheus monitoring stack
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: hailo-prometheus
+    profiles: ["monitoring"]  # Only start with --profile monitoring
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+    networks:
+      - edgeinfer-network
+    depends_on:
+      - hailo-inference
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: hailo-grafana
+    profiles: ["monitoring"]
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=hailo123
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+    networks:
+      - edgeinfer-network
+    depends_on:
+      - prometheus
+
+# Persistent volumes
+volumes:
+  grafana-data:
+    driver: local

@@ -1,0 +1,113 @@
+# HailoRT TCN Inference Sidecar - Runtime Configuration
+# Configuration for production deployment on Raspberry Pi + Hailo-8
+
+model:
+  # Model artifact paths
+  hef_path: "artifacts/tcn_encoder.hef"
+  num_motifs: 12
+  
+  # Normalization parameters (must match training exactly)
+  normalization:
+    method: "z_score"
+    per_channel: true
+    # These values are loaded from model_loader.py NORMALIZATION_PARAMS
+    # Do not modify unless retraining the model
+
+inference:
+  # Performance targets from ADR-0007
+  target_latency_ms: 50
+  target_throughput_windows_per_sec: 20
+  
+  # Batch processing (disabled for real-time)
+  batch_size: 1
+  max_queue_size: 10
+  
+  # Timeout and retry settings
+  timeout_ms: 100
+  max_retries: 3
+  
+  # Input validation
+  validate_input_ranges: true
+  strict_shape_validation: true
+
+hardware:
+  # Hailo device configuration
+  device_id: "hailo0"
+  device_path: "/dev/hailo0"
+  
+  # Performance monitoring
+  monitor_temperature: true
+  monitor_utilization: true
+  temperature_warning_celsius: 70
+  temperature_critical_celsius: 85
+  
+  # Memory management
+  memory_pool_size_mb: 64
+  enable_memory_profiling: false
+
+logging:
+  level: "info"  # debug, info, warning, error
+  format: "structured"
+  
+  # Log destinations
+  console: true
+  file: false
+  syslog: false
+  
+  # Request logging
+  log_requests: true
+  log_inference_details: false  # Only enable for debugging
+  log_metrics: true
+
+monitoring:
+  # Prometheus metrics
+  enable_prometheus: true
+  metrics_port: 9000  # Same as API port
+  metrics_path: "/metrics"
+  
+  # Health checks
+  health_check_interval_sec: 30
+  health_check_timeout_sec: 10
+  
+  # Telemetry
+  telemetry_enabled: true
+  telemetry_dir: "telemetry"
+  telemetry_retention_days: 7
+
+api:
+  # FastAPI configuration
+  host: "0.0.0.0"
+  port: 9000
+  workers: 1  # Single worker for deterministic inference
+  
+  # CORS for EdgeInfer
+  allow_origins: ["*"]
+  allow_methods: ["GET", "POST", "HEAD"]
+  
+  # Request limits
+  max_request_size_mb: 10
+  request_timeout_sec: 30
+  
+  # Documentation
+  docs_enabled: true
+  redoc_enabled: true
+
+security:
+  # Basic security settings
+  api_key_required: false  # Enable for production if needed
+  rate_limiting: false     # Enable if experiencing abuse
+  
+  # Request validation
+  strict_content_type_validation: true
+  max_json_depth: 10
+
+development:
+  # Development mode settings
+  reload: false
+  debug: false
+  
+  # Testing endpoints
+  enable_test_endpoints: true
+  
+  # Stub mode (when HailoRT not available)
+  stub_inference: false  # Auto-detected based on HailoRT availability

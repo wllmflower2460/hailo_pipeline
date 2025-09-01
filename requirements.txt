@@ -122,6 +122,11 @@ threadpoolctl==3.6.0
 timm==1.0.19
 tinycss2==1.4.0
 tomli==2.2.1
+# FastAPI ecosystem for HailoRT sidecar
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+
 # CPU-only PyTorch - to install run:
 # pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 torch>=2.2.0
