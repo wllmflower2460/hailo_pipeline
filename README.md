@@ -54,6 +54,11 @@ hailo_pipeline/
 │   └── requirements.txt           # Python dependencies
 │
 └── 🧪 TESTING & DOCS
+    ├── data/test_samples/        # IMU test data samples
+    │   ├── realistic_imu_sample.json   # Production-like IMU data
+    │   ├── static_imu_sample.json      # Predictable test pattern
+    │   └── random_imu_sample.json      # Random test data
+    ├── test_sidecar_api.sh       # Comprehensive API test script
     ├── test_sidecar.py           # FastAPI endpoint testing
     ├── test_pipeline.py          # End-to-end testing
     ├── HARDWARE_DEPLOYMENT.md    # Hardware setup guide
@@ -77,12 +82,38 @@ hailo_pipeline/
 - **HailoRT 4.17.0+** runtime
 - **Docker** for containerized deployment
 
-### Setup Instructions
+## 🚀 **Quick Start**
+
+### **Production Deployment (Recommended)**
+```bash
+# 1. Clone repository
+git clone <repository-url>
+cd hailo_pipeline
+
+# 2. Run automated deployment
+./deploy_production.sh
+
+# 3. Verify service health
+curl http://localhost:9000/healthz
+```
+
+### **API Testing**
+```bash
+# Quick test with bundled samples
+./test_sidecar_api.sh
+
+# Test specific endpoint
+curl -X POST http://localhost:9000/infer \
+  -H "Content-Type: application/json" \
+  -d @data/test_samples/realistic_imu_sample.json
+```
+
+### **Manual Setup Instructions**
 
 1. Clone this repository:
 ```bash
 git clone <repository-url>
-cd dog_training_pipeline
+cd hailo_pipeline
 ```
 
 2. Create and activate a virtual environment:
