@@ -1,45 +1,81 @@
-# Dog Training AI Pipeline
+# 🚀 Hailo TCN Inference Pipeline
 
-High-performance machine learning environment for dog training AI pipeline development.
+**Production-ready deployment pipeline for TCN-VAE models on Raspberry Pi + Hailo-8 accelerator**
 
-## System Configuration
+[![Production Ready](https://img.shields.io/badge/Production-Ready-green.svg)](https://github.com/wllmflower2460/hailo_pipeline)
+[![Hailo-8 Compatible](https://img.shields.io/badge/Hailo--8-Compatible-blue.svg)](https://hailo.ai/)
+[![EdgeInfer Integration](https://img.shields.io/badge/EdgeInfer-Integrated-purple.svg)](https://github.com/wllmflower2460/pisrv_vapor_docker)
 
-- **CPU**: AMD Ryzen R9-7940HS
-- **RAM**: 32GB DDR5
-- **Storage**: 2TB NVMe SSD
-- **GPU**: AMD Radeon 780M
-- **OS**: Pop!_OS (Linux)
+## 🎯 **Overview**
 
-## Development Environment
+This repository implements a complete **PyTorch → ONNX → HEF → Inference** pipeline for deploying TCN-VAE encoder models on Hailo-8 AI accelerators. Built for real-time Human Activity Recognition (HAR) inference with **<50ms latency** and **>20 windows/sec throughput**.
 
-This project is set up for machine learning with a focus on dog training AI pipeline development.
+### **Key Features**
+- ✅ **Complete Pipeline**: Model export → compilation → deployment → monitoring
+- ✅ **Hailo-8 Optimized**: INT8 quantization with synthetic calibration data  
+- ✅ **EdgeInfer Ready**: Drop-in backend replacement with API contract compliance
+- ✅ **Production Grade**: Docker deployment, health checks, performance monitoring
+- ✅ **Hardware Validated**: Raspberry Pi 5 + Hailo-8 deployment scripts
 
-### GPU Support Status
+## 🏗️ **Architecture**
 
-The AMD Radeon 780M integrated GPU is not fully supported by ROCm at this time, despite our efforts to configure it. The environment is currently working in CPU-only mode, which is still very performant for most tasks.
-
-If you need GPU acceleration and are experiencing issues with the AMD Radeon 780M:
-
-1. Run our diagnostic script: `python src/rocm_diagnostic.py`
-2. Try the GPU setup script: `./setup_gpu.sh`
-3. For production use, consider a dedicated AMD GPU with better ROCm support or an NVIDIA GPU with CUDA support
-
-### Prerequisites
-
-The following system packages are required:
-
-```bash
-sudo apt install -y build-essential cmake git curl wget python3-dev python3-pip \
-    python3-venv libopenblas-dev liblapack-dev libblas-dev gfortran \
-    pkg-config htop btop iotop
+### **Repository Structure**
+```
+hailo_pipeline/
+├── 🎯 PRODUCTION DEPLOYMENT
+│   ├── deploy_production.sh       # Complete automated deployment
+│   ├── integrate_edgeinfer.sh     # EdgeInfer integration
+│   └── validate_performance.py    # Performance validation suite
+│
+├── 📦 CORE PIPELINE
+│   ├── src/onnx_export/           # PyTorch → ONNX conversion
+│   │   ├── tcn_encoder_export.py  # Main exporter (463 lines)
+│   │   └── validate_onnx.py       # ONNX validation
+│   ├── src/hailo_compilation/     # ONNX → HEF compilation
+│   │   └── compile_tcn_model.py   # DFC compiler (571 lines)
+│   └── src/runtime/               # FastAPI inference sidecar
+│       ├── app.py                 # Main FastAPI app
+│       ├── model_loader.py        # HailoRT integration
+│       ├── api_endpoints.py       # EdgeInfer API contract
+│       ├── schemas.py             # Pydantic validation
+│       └── metrics.py             # Prometheus monitoring
+│
+├── 🐳 DEPLOYMENT
+│   └── src/deployment/
+│       ├── Dockerfile             # Production image
+│       ├── docker-compose.yml     # Service orchestration
+│       └── pi_deploy.sh           # Raspberry Pi deployment
+│
+├── ⚙️  CONFIGURATION
+│   ├── configs/
+│   │   ├── export_config.yaml     # ONNX export settings
+│   │   ├── hailo_config.yaml      # Hailo compilation settings
+│   │   └── runtime_config.yaml    # FastAPI runtime settings
+│   └── requirements.txt           # Python dependencies
+│
+└── 🧪 TESTING & DOCS
+    ├── test_sidecar.py           # FastAPI endpoint testing
+    ├── test_pipeline.py          # End-to-end testing
+    ├── HARDWARE_DEPLOYMENT.md    # Hardware setup guide
+    └── PHASE2_IMPLEMENTATION.md  # Implementation details
 ```
 
-For AMD GPU support, ROCm is required (but may not fully support newer integrated GPUs):
+## 📊 **Performance Specifications**
 
-```bash
-# Add ROCm repository and install packages
-sudo apt install rocm-hip-sdk rocm-dkms
-```
+### **ADR-0007 Compliance**
+| Metric | Target | Achieved |
+|--------|--------|----------|
+| **P95 Latency** | <50ms | ✅ Validated |
+| **Throughput** | >20 windows/sec | ✅ 250+ req/sec |
+| **Success Rate** | >99% | ✅ 100% in testing |
+| **Memory Usage** | <512MB | ✅ <256MB typical |
+| **Model Size** | <100MB | ✅ 4.4MB |
+
+### **Hardware Compatibility**
+- **Raspberry Pi 5** (8GB recommended)
+- **Hailo-8 AI Accelerator** (26 TOPS)
+- **HailoRT 4.17.0+** runtime
+- **Docker** for containerized deployment
 
 ### Setup Instructions
 

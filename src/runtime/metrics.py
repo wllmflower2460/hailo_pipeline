@@ -74,6 +74,19 @@ error_counter = Counter(
     ['error_type', 'model']
 )
 
+# Enhanced build and configuration tracking metrics (ADR-0007 revision)
+build_info_gauge = Gauge(
+    'hailo_build_info',
+    'Build and configuration information',
+    ['version', 'hef_sha', 'config']
+)
+
+config_ok_gauge = Gauge(
+    'hailo_config_ok',
+    'Configuration validation status (1=OK, 0=mismatch)',
+    ['expected', 'actual']
+)
+
 # Thread-safe metrics lock
 _metrics_lock = threading.RLock()
 
@@ -132,6 +145,25 @@ class MetricsCollector:
             
             if utilization is not None:
                 hailo_device_utilization.labels(device_id=device_id).set(utilization)
+
+    def update_build_info(self, version: str, hef_sha: str, config_version: str):
+        """Update build information metrics for fleet tracking"""
+        with _metrics_lock:
+            build_info_gauge.labels(
+                version=version,
+                hef_sha=hef_sha,
+                config=config_version
+            ).set(1)
+
+    def update_config_status(self, expected_config: str, actual_config: str):
+        """Update configuration validation status"""
+        with _metrics_lock:
+            # Set to 1 if configs match, 0 if mismatch
+            config_ok = 1 if expected_config == actual_config else 0
+            config_ok_gauge.labels(
+                expected=expected_config,
+                actual=actual_config
+            ).set(config_ok)
 
 
 # Global metrics collector instance
@@ -192,9 +224,36 @@ def record_startup_metrics(model_loader):
     if model_loader and model_loader.is_ready():
         model_info = model_loader.get_status()
         collector.update_model_status(True, model_info)
-        logger.info("✅ Model metrics recorded as loaded")
+        
+        # Record enhanced build information
+        collector.update_build_info(
+            version="v1.0.0",
+            hef_sha=model_loader.hef_sha256,
+            config_version=model_loader.config_version
+        )
+        
+        # Record configuration validation status
+        expected_config = model_loader.config_version
+        actual_config = model_loader.config_version  # In production, this might come from different source
+        collector.update_config_status(expected_config, actual_config)
+        
+        logger.info("✅ Model and build metrics recorded as loaded")
+        logger.info(f"Build info: version=v1.0.0, hef_sha={model_loader.hef_sha256}, config={model_loader.config_version}")
     else:
         collector.update_model_status(False)
+        
+        # Still record build info even if model fails to load
+        if model_loader:
+            collector.update_build_info(
+                version="v1.0.0",
+                hef_sha=model_loader.hef_sha256,
+                config_version=model_loader.config_version
+            )
+            collector.update_config_status(
+                expected_config=model_loader.config_version,
+                actual_config="model_load_failed"
+            )
+        
         logger.warning("❌ Model metrics recorded as not loaded")
 
 

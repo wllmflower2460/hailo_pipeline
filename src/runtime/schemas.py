@@ -99,6 +99,9 @@ class HealthResponse(BaseModel):
     """Health check response for EdgeInfer monitoring"""
     ok: bool = Field(..., description="Model is ready for inference")
     model: str = Field(..., description="Loaded model identifier")
+    uptime_s: int = Field(..., description="Service uptime in seconds")
+    config_version: str = Field(..., description="Configuration version identifier")
+    hef_sha256: str = Field(..., description="HEF model file SHA256 hash")
     version: str = Field(default="1.0.0", description="Sidecar version")
     device: str = Field(default="hailo8", description="Hardware accelerator")
     latency_ms: float = Field(default=0.0, description="Last inference latency")

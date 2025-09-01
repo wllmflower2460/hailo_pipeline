@@ -12,6 +12,7 @@ from typing import Tuple, List, Optional, Dict, Any
 import asyncio
 import time
 import json
+import hashlib
 
 # HailoRT imports - graceful fallback for development
 try:
@@ -61,11 +62,38 @@ class ModelLoader:
         self._initialization_error: Optional[str] = None
         self.last_inference_time: float = 0.0
         
+        # Enhanced health tracking
+        self.start_time = time.time()
+        self.config_version = "hailo_pipeline_production_config-2025-09-01"
+        self.hef_sha256 = self._compute_hef_hash()
+        
         # Normalization arrays (precomputed for performance)
         self.norm_mean = np.array(self.NORMALIZATION_PARAMS["zscore_mean"], dtype=np.float32)
         self.norm_std = np.array(self.NORMALIZATION_PARAMS["zscore_std"], dtype=np.float32)
         
         logger.info(f"ModelLoader initialized - HEF: {self.hef_path}, Motifs: {num_motifs}")
+        logger.info(f"HEF SHA256: {self.hef_sha256}")
+        logger.info(f"Config version: {self.config_version}")
+
+    def _compute_hef_hash(self) -> str:
+        """Compute SHA256 hash of HEF file for integrity verification"""
+        if not self.hef_path.exists():
+            return "file_not_found"
+        
+        try:
+            hash_sha256 = hashlib.sha256()
+            with open(self.hef_path, "rb") as f:
+                # Read file in chunks to handle large HEF files efficiently
+                for chunk in iter(lambda: f.read(4096), b""):
+                    hash_sha256.update(chunk)
+            return hash_sha256.hexdigest()[:16]  # First 16 chars for readability
+        except Exception as e:
+            logger.error(f"Failed to compute HEF hash: {e}")
+            return "hash_error"
+
+    def get_uptime(self) -> int:
+        """Get service uptime in seconds"""
+        return int(time.time() - self.start_time)
         
     async def initialize(self):
         """Initialize Hailo device and load model"""

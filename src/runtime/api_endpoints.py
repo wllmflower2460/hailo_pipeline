@@ -52,6 +52,9 @@ async def health_check():
             return HealthResponse(
                 ok=True,
                 model=_model_loader.model_name,
+                uptime_s=_model_loader.get_uptime(),
+                config_version=_model_loader.config_version,
+                hef_sha256=_model_loader.hef_sha256,
                 device="hailo8",
                 latency_ms=_model_loader.last_inference_time
             )
