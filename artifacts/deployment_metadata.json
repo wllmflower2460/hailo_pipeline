@@ -1,0 +1,70 @@
+{
+  "deployment_info": {
+    "timestamp": "2025-09-05T01:15:13.908996Z",
+    "model_version": "v72pct",
+    "model_accuracy": "72.13%",
+    "improvement": "+25.1% over baseline"
+  },
+  "artifacts": {
+    "hef_file": "tcn_encoder_v72pct.hef",
+    "hef_size_mb": 0.0
+  },
+  "edge_deployment": {
+    "target_platform": "raspberry_pi_5_hailo_8",
+    "container_mount": "/app/artifacts/tcn_encoder_v72pct.hef",
+    "expected_performance": {
+      "latency_p95_ms": 50,
+      "throughput_req_sec": 250,
+      "memory_usage_mb": 512
+    }
+  },
+  "integration": {
+    "edgeinfer_endpoint": "/encode",
+    "input_format": "normalized_imu_window",
+    "output_format": "latent_embeddings",
+    "batch_size": 1
+  },
+  "normalization": {
+    "method": "z_score_per_channel",
+    "mean": [
+      0.11999999731779099,
+      -0.07999999821186066,
+      9.779999732971191,
+      0.0020000000949949026,
+      -0.0010000000474974513,
+      0.003000000026077032,
+      22.399999618530273,
+      -8.699999809265137,
+      43.20000076293945
+    ],
+    "std": [
+      3.9200000762939453,
+      3.869999885559082,
+      2.450000047683716,
+      1.2400000095367432,
+      1.309999942779541,
+      0.9800000190734863,
+      28.5,
+      31.200000762939453,
+      24.799999237060547
+    ],
+    "channel_order": [
+      "ax",
+      "ay",
+      "az",
+      "gx",
+      "gy",
+      "gz",
+      "mx",
+      "my",
+      "mz"
+    ]
+  },
+  "next_steps": [
+    "Copy artifacts to Edge platform",
+    "Update EdgeInfer Docker Compose configuration",
+    "Restart EdgeInfer sidecar service",
+    "Validate performance benchmarks",
+    "Run integration tests"
+  ]
+}

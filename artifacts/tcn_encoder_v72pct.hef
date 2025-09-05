@@ -1,0 +1,52 @@
+{
+  "mock_hef": true,
+  "original_onnx": "tcn_encoder_for_edgeinfer.onnx",
+  "model_accuracy": "72.13%",
+  "compilation_timestamp": "2025-09-05T01:15:13.908194Z",
+  "input_shape": [
+    1,
+    100,
+    9
+  ],
+  "output_shape": [
+    1,
+    64
+  ],
+  "normalization": {
+    "method": "z_score_per_channel",
+    "mean": [
+      0.11999999731779099,
+      -0.07999999821186066,
+      9.779999732971191,
+      0.0020000000949949026,
+      -0.0010000000474974513,
+      0.003000000026077032,
+      22.399999618530273,
+      -8.699999809265137,
+      43.20000076293945
+    ],
+    "std": [
+      3.9200000762939453,
+      3.869999885559082,
+      2.450000047683716,
+      1.2400000095367432,
+      1.309999942779541,
+      0.9800000190734863,
+      28.5,
+      31.200000762939453,
+      24.799999237060547
+    ],
+    "channel_order": [
+      "ax",
+      "ay",
+      "az",
+      "gx",
+      "gy",
+      "gz",
+      "mx",
+      "my",
+      "mz"
+    ]
+  },
+  "note": "This is a mock HEF file. Replace with real HEF from Hailo DFC compilation."
+}
